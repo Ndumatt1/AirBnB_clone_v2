@@ -9,6 +9,7 @@ def do_pack():
     ''' generates .tgz archive '''
     mydate = datetime.now()
     my_date2 = mydate.strftime("%Y%m%d%H%M%S")
+    local("mkdir -p versions")
     path = "versions/web_static_{}.tgz".format(my_date2)
     local("tar -cvzf {} web_static".format(path))
     if os.path.exists(path):
