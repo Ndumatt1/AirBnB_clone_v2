@@ -18,7 +18,6 @@ class DBStorage:
     __session = None
     classes = {'User': User, 'State': State, 'Amenity': Amenity, 'Place': Place,
     'Review': Review, 'City': City}
-	
     def __init__(self):
         ''' Instatiates attributes '''
         user = os.getenv('HBNB_MYSQL_USER')
@@ -34,15 +33,35 @@ class DBStorage:
         ''' Query on the current database session all objects 
         depending on class name
         '''
-        cls = classes.get(cls, None)
-        if cls == None:
-            self.__session.query(cls).all()
+        '''cls = self.classes.get(cls, None)
+        objs = {}
+        if cls is not None:
+            for obj in self.__session.query(cls).all():
+                objs.update({obj.to_dict()['__class__'] + '.' + obj.id: obj})
+            # self.__session.query(cls).all()
         else:
             dictionary = {}
             query = self.__session.query(cls).all()
             for objects in query:
                 dictionary[objects.__class__.__name__ + '.' + objects.id] = objects
-            return dictionary
+            return dictionary'''
+        dic = {}
+        if cls:
+            if type(cls) is str:
+                cls = eval(cls)
+            query = self.__session.query(cls)
+            for elem in query:
+                key = "{}.{}".format(type(elem).__name__, elem.id)
+                dic[key] = elem
+        else:
+            lista = [State, City, User, Place, Review, Amenity]
+            for clase in lista:
+                query = self.__session.query(clase)
+                for elem in query:
+                    key = "{}.{}".format(type(elem).__name__, elem.id)
+                    dic[key] = elem
+        return (dic)
+
 
     def new(self, obj):
         ''' adds the object to the current database session '''
@@ -63,3 +82,7 @@ class DBStorage:
         session_factory = sessionmaker(bind=self.__engine, expire_on_commit=False)
         Base.metadata.create_all(self.__engine)
         self.__session = scoped_session(session_factory)
+
+    def close(self):
+        ''' calls close() method on session'''
+        self.__session.close()
