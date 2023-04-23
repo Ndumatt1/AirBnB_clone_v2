@@ -15,7 +15,7 @@ def states_list():
 
 
 @app.teardown_appcontext
-def teardown():
+def teardown(exc):
     ''' remove the current SQLALchemy Session'''
     storage.close()
 
